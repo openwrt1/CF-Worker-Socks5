@@ -1,48 +1,57 @@
-# cfproxy-plus #
-### A socks5 proxy server deployed on the Cloudflare Worker ###
+# cfproxy-plus
 
-Cloudflare Worker 代理工具
+### 基于 Cloudflare Worker 的 SOCKS5 代理服务器
 
-### 使用 ###
-* 将worler.js里passwd的变量值修改后复制全部内容到Worker部署.
-* 在程序目录下面新建一个config.txt文件, 输入类似下面的配置内容:
+一个部署在 Cloudflare Worker 上的代理工具
 
-{"domain":"a.com","psw":"passwd value","sport":1080,"sbind":"127.0.0.1","wkip":"","byip":"","cfhs":["ipip.net",""]}
+### 主要更新
 
-* domain: 	worker绑定的域名 (必填)
-* psw: 			与worker.js里的passwd变量相同值 (必填)
-* sport: 		本地绑定的socks5端口
-* sbind: 		本地绑定的地址, 一般为 127.0.0.1
-* wkip: 		为本地连接到worker指定优选的IP, 不指定则不优选IP
-* byip: 		指定未被worker屏蔽的Cloudflare anycast IP, 不指定则通过本地连接
-* cfhs: 		指定特定域名为worker屏蔽的域名
+- 优化了 WebSocket 连接逻辑,支持自定义 Worker IP 和端口
+- 增加了对 Cloudflare IP 的智能识别和处理
+- 新增配置选项,可指定特定域名走 Worker 代理
+- 改进了错误处理和日志记录
+- 没有依赖任何第三方软件
+- 可以不设置`proxyip`和`proxyport`, Cloudflare IP 会自动走本地网络
 
-运行程序后将在本地机器开启一个socks5代理端口，浏览器或应用程序设置代理到此端口即可代理上网
+### 使用方法
 
-推荐: Windows上可使用Proxifier来为需要代理的程序强行指定代理
+1. 修改`worker.js`中的`passwd`变量,然后部署到 Cloudflare Worker
 
-[兴趣群组](https://t.me/DNetLab)
+2. 部署完成后,在 Cloudflare Worker 中获取到域名和 Worker ID
 
-# License #
-(The MIT License)
+3. 在本地创建或修改`config.json.example`配置文件,然后重命名为`config.json`:
 
-Copyright (c) 2023 DNetL &lt;DNetL@pm.me&gt;
+```json
+{
+  "domain": "your-worker-domain.example.com",
+  "psw": "your-password",
+  "sport": 1080,
+  "sbind": "127.0.0.1",
+  "wkip": "",
+  "wkport": "",
+  "proxyip": "",
+  "proxyport": "",
+  "cfhs": ["example.com", ""]
+}
+```
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-'Software'), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+- `psw`: 与 Worker 中设置的密码一致(必填)
+- `sport`: 本地 SOCKS5 代理端口(必填)
+- `sbind`: 本地绑定地址,通常为 127.0.0.1(必填)
+- `wkip`: 指定连接 Worker 的 IP(可选)
+- `wkport`: 指定连接 Worker 的端口(可选)
+- `proxyip`: 指定未被屏蔽的 Cloudflare IP(可选)
+- `proxyport`: 指定未被屏蔽的 Cloudflare IP 端口(可选)
+- `cfhs`: 指定强制走 Worker 代理的域名列表(可选)
 
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
+4. 运行程序 `node cli.js`,本地会开启 SOCKS5 代理服务
 
-THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+5. 配置浏览器或其他应用程序使用该代理
+
+### 推荐
+
+Windows 用户可使用 Proxifier 为指定程序强制使用代理
+
+### 许可证
+
+MIT License

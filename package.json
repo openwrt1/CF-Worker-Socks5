@@ -2,6 +2,12 @@
   "name": "cfpx",
   "description": "A socks5 proxy server deployed on the Cloudflare Worker",
   "bin": "cli.js",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "build": "wrangler deploy --dry-run",
+    "dev": "wrangler dev --remote",
+    "dev-local": "wrangler dev worker.js --remote"
+  },
   "author": "DNetL",
   "keywords": [
     "proxy",
@@ -20,6 +26,7 @@
   },
   "homepage": "https://github.com/DNetL/cfp-plus#readme",
   "dependencies": {
+    "wrangler": "^3.78.7",
     "ws": "^8.2.3"
   },
   "version": "2.1.0",
