@@ -1,4 +1,4 @@
-# cfproxy-plus
+# CF-Worker-Socks
 
 ### 基于 Cloudflare Worker 的 SOCKS5 代理服务器
 
