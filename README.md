@@ -2,7 +2,7 @@
 
 ### 基于 Cloudflare Worker 的 SOCKS5 代理服务器
 
-一个部署在 Cloudflare Worker 上的高性能、灵活可配置的代理工具
+一个部署在 Cloudflare Worker 上的高性能、灵活可配置的代理工具，不是v2ray也不会兼容vless，是一种新的协议
 
 ### 主要特点
 
