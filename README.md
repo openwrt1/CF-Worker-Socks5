@@ -42,25 +42,25 @@ graph TD
 
 ### 工作原理详解
 
-1. 客户端发送SOCKS5请求到本地SOCKS5服务器。
-2. 本地服务器解析目标地址,判断是否为Cloudflare IP。
-3. 如果是Cloudflare IP且未配置proxyip:
-   - 直接建立TCP连接到目标地址。
+1. 客户端发送 SOCKS5 请求到本地 SOCKS5 服务器。
+2. 本地服务器解析目标地址,判断是否为 Cloudflare IP。
+3. 如果是 Cloudflare IP 且未配置 proxyip:
+   - 直接建立 TCP 连接到目标地址。
 4. 否则:
-   - 建立WebSocket连接到Cloudflare Worker。
-   - 通过Worker转发数据到目标地址。
+   - 建立 WebSocket 连接到 Cloudflare Worker。
+   - 通过 Worker 转发数据到目标地址。
 5. 数据传输:
    - 如果是直接连接,数据直接在客户端和目标服务器之间传输。
-   - 如果通过Worker,数据经由WebSocket和Worker中转。
+   - 如果通过 Worker,数据经由 WebSocket 和 Worker 中转。
 6. 返回数据按原路径传回客户端。
 
-这个流程确保了根据目标地址和配置,选择最优的连接路径,既能利用Cloudflare的全球网络,又能在可能的情况下实现直连以提高性能。
+这个流程确保了根据目标地址和配置,选择最优的连接路径,既能利用 Cloudflare 的全球网络,又能在可能的情况下实现直连以提高性能。
 
 ### 使用方法
 
-1. 修改 `worker.js` 中的 `passwd` 变量,然后部署到 Cloudflare Worker
+1. 修改 `worker.js` 中的 `passwd` 变量，然后部署到 Cloudflare Worker
 
-2. 部署完成后,在 Cloudflare Worker 中获取到域名
+2. 部署完成后，在 Cloudflare Worker 中获取到域名
 
 3. 在本地创建或修改 `config.json` 配置文件:
 
@@ -71,35 +71,86 @@ graph TD
   "sport": 1080,
   "sbind": "127.0.0.1",
   "wkip": "",
-  "wkport": "",
+  "wkport": 0,
   "proxyip": "",
-  "proxyport": "",
-  "cfhs": ["example.com", ""]
+  "proxyport": 0,
+  "cfhs": ["example.com"]
 }
 ```
 
 配置说明:
+
 - `domain`: Worker 的域名(必填)
 - `psw`: 与 Worker 中设置的密码一致(必填)
 - `sport`: 本地 SOCKS5 代理端口(必填)
-- `sbind`: 本地绑定地址,通常为 127.0.0.1(必填)
+- `sbind`: 本地绑定地址，通常为 127.0.0.1(必填)
 - `wkip`: 指定连接 Worker 的 IP(可选)
 - `wkport`: 指定连接 Worker 的端口(可选)
 - `proxyip`: 指定未被屏蔽的 Cloudflare IP(可选)
 - `proxyport`: 指定未被屏蔽的 Cloudflare IP 端口(可选)
 - `cfhs`: 指定强制走 Worker 代理的域名列表(可选)
 
-4. 运行程序 `node cli.js`,本地会开启 SOCKS5 代理服务
+4. 运行程序：
 
-5. 配置浏览器或其他应用程序使用该代理
+   - 对于 Go 版本：编译并运行 `go run main.go` 或 `go build -o cf-worker-socks5 && ./cf-worker-socks5`
+   - 对于 Node.js 版本：运行 `node cli.js`
+
+5. 本地会开启 SOCKS5 代理服务
+
+6. 配置浏览器或其他应用程序使用该代理
+
+### 新版本（Go）的主要变化
+
+1. **性能提升**：
+
+   - 使用 Go 语言实现，提供更好的并发性能和资源利用率。
+   - 内置更高效的 DNS 解析和缓存机制。
+
+2. **更强大的网络处理**：
+
+   - 支持 IPv6，提供更全面的网络协议支持。
+   - 改进的 Cloudflare IP 检测算法，支持 IPv4 和 IPv6 CIDR。
+
+3. **增强的错误处理和日志记录**：
+
+   - 更详细的错误日志，便于调试和问题诊断。
+   - 优化的连接管理和错误恢复机制。
+
+4. **代码结构优化**：
+
+   - 更清晰的模块化设计，便于维护和扩展。
+   - 使用 Go 的标准库和优秀的第三方包（如 gorilla/websocket）提高代码质量。
+
+5. **配置灵活性**：
+
+   - 支持更多自定义配置选项，如 WebSocket 连接超时设置。
+   - 改进的配置文件解析和验证。
+
+6. **安全性提升**：
+
+   - 使用 TLS 配置增强 WebSocket 连接的安全性。
+   - 支持自定义 TLS 配置，如禁用证书验证（仅用于特殊情况）。
+
+7. **兼容性**：
+
+   - 保持与旧版 Node.js 实现的配置文件兼容性，便于用户迁移。
+   - 完全兼容 worker 的协议，无需修改 worker 的代码。
+
+8. **部署便利性**：
+   - 可以编译为单一可执行文件，无需安装额外的运行时环境。
+   - 跨平台支持，可在多种操作系统上运行。
+
+这些改进使得新版本在性能、安全性和可用性方面都有显著提升，同时保持了与旧版本的兼容性，方便用户平滑迁移。
 
 ### 高级配置
 
 1. **自定义 Worker 连接**:
+
    - 设置 `wkip` 和 `wkport` 可以指定连接 Worker 的 IP 和端口
    - 这在某些网络环境下可能会提高连接稳定性和速度
 
 2. **强制代理特定域名**:
+
    - 通过 `cfhs` 配置可以指定哪些域名强制通过 Worker 代理
    - 适用于需要特殊处理的网站或服务
 
@@ -137,7 +188,7 @@ graph TD
 
 1. 代码风格一致
 2. 添加必要的注释和文档
-3. 更新 README 文件以反映新的��化
+3. 更新 README 文件以反映新的化
 
 ### 许可证
 
