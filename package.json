@@ -27,10 +27,11 @@
   },
   "homepage": "https://github.com/DNetL/cfp-plus#readme",
   "dependencies": {
-    "ws": "^8.2.3"
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "pkg": "^5.8.1",
+    "prettier": "3.6.2",
     "wrangler": "^3.78.7"
   },
   "version": "2.1.0",

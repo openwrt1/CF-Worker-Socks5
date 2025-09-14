@@ -3,5 +3,11 @@ main = "worker.js"
 compatibility_date = "2023-05-26"
 workers_dev = true
 
+# 告诉 wrangler 这个 worker 应该由哪个域名触发
+[[routes]]
+pattern = "daili.pengproxyz.icu"
+custom_domain = true
+
 [vars]
-PASSWD = "123456"
+# 把密码放在这里管理
+PASSWD = "4056063"
